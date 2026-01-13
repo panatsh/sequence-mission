@@ -1,0 +1,1716 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Unlock the Picture: Sequence Mission</title>
+  <style>
+    :root{
+      --bg1:#fff4d6;
+      --bg2:#e9fbff;
+      --ink:#1f2a37;
+      --muted:#5b6776;
+      --brand:#2bb3d6;
+      --brand2:#7cda7a;
+      --shadow: 0 14px 40px rgba(31,42,55,.12);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html, body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Calibri, "Segoe UI", Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 450px at 18% 18%, var(--bg2), transparent 60%),
+        radial-gradient(900px 450px at 80% 30%, #fff1f4, transparent 60%),
+        linear-gradient(180deg, var(--bg1), #ffffff 55%);
+      overflow:auto;
+    }
+    .wrap{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px 14px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      min-height: 100vh;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .title{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      min-width: 260px;
+    }
+    .badge{
+      width:52px; height:52px; border-radius:14px;
+      background: linear-gradient(135deg, #ffd56a, #7fe4ff);
+      box-shadow: 0 10px 28px rgba(0,0,0,.10);
+      display:grid; place-items:center;
+      font-weight:800;
+      font-size:24px;
+      flex: 0 0 auto;
+    }
+    h1{
+      margin:0;
+      font-size: 28px;
+      line-height:1.05;
+      letter-spacing:.2px;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    button{
+      font-family:inherit;
+      font-size:18px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 0;
+      cursor:pointer;
+      box-shadow: 0 12px 26px rgba(31,42,55,.10);
+      transition: transform .08s ease, filter .15s ease;
+      user-select:none;
+    }
+    button:active{ transform: translateY(1px) }
+    button[disabled]{ opacity:.55; cursor:not-allowed; box-shadow:none; }
+    .btn-ghost{
+      background: rgba(255,255,255,.75);
+      border: 2px solid rgba(31,42,55,.10);
+      color: var(--ink);
+      box-shadow:none;
+      padding: 9px 12px;
+    }
+    .btn-primary{
+      background: linear-gradient(135deg, var(--brand), #73d7f1);
+      color:#053240;
+      font-weight:800;
+    }
+    .btn-next{
+      background: linear-gradient(135deg, var(--brand2), #b7f5a4);
+      color:#0f2b12;
+      font-weight:900;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns: 1.55fr .95fr;
+      gap: 14px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .main{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: rgba(255,255,255,.92);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(31,42,55,.08);
+      overflow:hidden;
+    }
+    .card-hd{
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(43,179,214,.16), rgba(255,255,255,0));
+      border-bottom: 1px dashed rgba(31,42,55,.14);
+    }
+    .progress{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      font-size:17px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .progress strong{ color:var(--ink) }
+
+    .card-bd{
+      padding: 12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .sequence{
+      background: linear-gradient(135deg, rgba(255,213,106,.32), rgba(127,228,255,.20));
+      border: 2px solid rgba(31,42,55,.08);
+      border-radius: 16px;
+      padding: 10px 12px;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing:.3px;
+      text-align:center;
+    }
+    .question{
+      font-size:24px;
+      font-weight:900;
+      margin: 0;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      display:inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      background: rgba(43,179,214,.18);
+      border: 1px solid rgba(43,179,214,.35);
+      font-weight:900;
+    }
+
+    .instruction{
+      border-radius: 16px;
+      border: 2px solid rgba(31,42,55,.08);
+      padding: 10px 12px;
+      font-size: 18px;
+      font-weight:800;
+      background: rgba(255,255,255,.88);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .instruction .tries{
+      color: var(--muted);
+      font-weight:900;
+      font-size: 17px;
+    }
+
+    .status{
+      border-radius: 16px;
+      border: 2px solid rgba(31,42,55,.08);
+      padding: 10px 12px;
+      font-size: 18px;
+      font-weight:800;
+      background: rgba(31,42,55,.03);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .dot{ width:12px; height:12px; border-radius:99px; background: rgba(31,42,55,.18); }
+    .status.ok{
+      background: rgba(47,158,68,.08);
+      border-color: rgba(47,158,68,.25);
+      color:#13421c;
+    }
+    .status.ok .dot{ background: rgba(47,158,68,.75); }
+    .status.bad{
+      background: rgba(226,74,74,.08);
+      border-color: rgba(226,74,74,.25);
+      color:#5c1717;
+    }
+    .status.bad .dot{ background: rgba(226,74,74,.75); }
+
+    .rows{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .row{
+      border-radius: 16px;
+      border: 2px solid rgba(31,42,55,.08);
+      background:#fff;
+      padding: 10px 10px;
+      display:grid;
+      grid-template-columns: 1.55fr .45fr;
+      gap:10px;
+      align-items:center;
+    }
+    .row.stack{
+      grid-template-columns: 1fr; /* full-width input (Set 4 equation) */
+      align-items:stretch;
+    }
+    @media (max-width: 680px){
+      .row{ grid-template-columns: 1fr; }
+    }
+    .label{
+      font-size:20px;
+      font-weight:900;
+      line-height:1.15;
+    }
+    .label.small{ font-size:19px; }
+    .hint{
+      margin-top:4px;
+      font-size:16px;
+      color:var(--muted);
+      font-weight:700;
+      display:none; /* show after first wrong (except helper lines) */
+    }
+    .hint.show{ display:block; }
+
+    .helper{
+      margin-top:4px;
+      font-size:16px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .input{
+      width:100%;
+      font-size:22px;
+      padding: 9px 10px;
+      border-radius: 14px;
+      border: 2px solid rgba(31,42,55,.14);
+      outline:none;
+      background: rgba(255,255,255,.98);
+      font-weight:900;
+      text-align:center;
+    }
+    .input.smalltext{
+      font-size:18px;       /* smaller text inside equation input */
+      text-align:left;      /* easier to read long equations */
+      padding-left:12px;
+    }
+    .input:focus{
+      border-color: rgba(43,179,214,.55);
+      box-shadow: 0 0 0 6px rgba(43,179,214,.12);
+    }
+    .input.correct{
+      border-color: rgba(47,158,68,.65);
+      box-shadow: 0 0 0 6px rgba(47,158,68,.10);
+    }
+    .input.wrong{
+      border-color: rgba(226,74,74,.70);
+      box-shadow: 0 0 0 6px rgba(226,74,74,.10);
+    }
+
+    /* Drag tiles */
+    .blank{
+      width:100%;
+      min-height: 46px;
+      border-radius: 14px;
+      border: 2px dashed rgba(31,42,55,.22);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:22px;
+      font-weight:950;
+      color: rgba(31,42,55,.70);
+      background: rgba(31,42,55,.02);
+      user-select:none;
+      cursor:pointer;
+      padding: 6px 8px;
+      text-align:center;
+    }
+    .blank .ph{
+      font-size:16px;   /* Set 2: smaller placeholder */
+      font-weight:850;
+      color: rgba(31,42,55,.60);
+    }
+    .blank.filled{
+      border-style: solid;
+      border-color: rgba(43,179,214,.30);
+      background: rgba(43,179,214,.06);
+      color: var(--ink);
+      font-size:22px;
+    }
+    .blank.correct{
+      border-color: rgba(47,158,68,.55);
+      background: rgba(47,158,68,.06);
+    }
+    .blank.wrong{
+      border-color: rgba(226,74,74,.60);
+      background: rgba(226,74,74,.06);
+    }
+
+    .tile-area{
+      border-radius: 16px;
+      border: 2px solid rgba(31,42,55,.08);
+      background: rgba(255,255,255,.90);
+      padding: 10px 10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+    }
+    .tile-title{
+      font-size: 17px;
+      color: var(--muted);
+      font-weight:900;
+      margin-right: 6px;
+    }
+    .tile{
+      padding: 9px 12px;
+      border-radius: 14px;
+      border: 2px solid rgba(31,42,55,.14);
+      background: rgba(255,255,255,.95);
+      font-size: 20px;
+      font-weight:950;
+      cursor:grab;
+      user-select:none;
+      box-shadow: 0 10px 22px rgba(31,42,55,.08);
+    }
+    .tile:active{ cursor:grabbing; transform: translateY(1px); }
+    .tile.used{
+      opacity:.40;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+    .tile.selected{
+      outline: 4px solid rgba(43,179,214,.20);
+      border-color: rgba(43,179,214,.45);
+    }
+
+    /* Matching */
+    .match-grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width: 980px){
+      .match-grid{ grid-template-columns: 1fr; }
+    }
+    .match-col{
+      border-radius: 16px;
+      border: 2px solid rgba(31,42,55,.08);
+      background: rgba(255,255,255,.90);
+      padding: 10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .match-head{
+      font-size:18px;
+      font-weight:950;
+      color: var(--muted);
+    }
+    .match-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .card-item{
+      border-radius: 14px;
+      border: 2px solid rgba(31,42,55,.12);
+      background:#fff;
+      padding: 10px 10px;
+      font-size: 20px;
+      font-weight:950;
+      cursor:pointer;
+      user-select:none;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card-item.small{ font-size:18px; }
+    .card-item.selected{
+      border-color: rgba(43,179,214,.45);
+      box-shadow: 0 0 0 6px rgba(43,179,214,.12);
+    }
+    .card-item.matched{
+      border-color: rgba(47,158,68,.40);
+      background: rgba(47,158,68,.06);
+      cursor:default;
+    }
+    .card-item.wrong{
+      border-color: rgba(226,74,74,.45);
+      background: rgba(226,74,74,.06);
+    }
+    .mini-chip{
+      font-size: 16px;
+      font-weight:950;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(31,42,55,.06);
+      border: 1px solid rgba(31,42,55,.12);
+      color: var(--muted);
+      flex: 0 0 auto;
+      max-width: 60%;
+      text-align:right;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .mini-chip.assigned{
+      background: linear-gradient(135deg, rgba(43,179,214,.18), rgba(124,218,122,.18));
+      border-color: rgba(43,179,214,.40);
+      color: #0b3b4a;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-start;
+      margin-top: 2px;
+    }
+
+    /* Puzzle */
+    .puzzle-title{
+      font-size:22px;
+      font-weight:950;
+      margin:0;
+    }
+    .puzzle-sub{
+      font-size:16px;
+      color:var(--muted);
+      margin-top:4px;
+      font-weight:800;
+    }
+    .puzzle-wrap{
+      padding: 12px 14px 14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .puzzle{
+      width:100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 18px;
+      border: 2px solid rgba(31,42,55,.10);
+      background: linear-gradient(135deg, rgba(255,255,255,.7), rgba(255,255,255,.95));
+      box-shadow: inset 0 0 0 8px rgba(255,213,106,.16);
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+      padding: 10px;
+      overflow:hidden;
+    }
+    .piece{
+      border-radius: 14px;
+      border: 2px dashed rgba(31,42,55,.14);
+      display:grid;
+      place-items:center;
+      position:relative;
+      overflow:hidden;
+      background: rgba(31,42,55,.03);
+    }
+    .piece svg{ width: 92%; height: 92%; }
+    .lock{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background: rgba(255,255,255,.72);
+      backdrop-filter: blur(2px);
+      font-size: 20px;
+      font-weight:950;
+      color: rgba(31,42,55,.55);
+      transition: opacity .35s ease, transform .35s ease;
+    }
+    .piece.unlocked{
+      border-style: solid;
+      border-color: rgba(43,179,214,.25);
+      background: rgba(43,179,214,.05);
+    }
+    .piece.unlocked .lock{
+      opacity:0;
+      transform: scale(1.05);
+      pointer-events:none;
+    }
+    .tip{
+      border-radius: 16px;
+      border: 2px solid rgba(31,42,55,.08);
+      background: rgba(255,255,255,.88);
+      padding: 10px 12px;
+      font-size: 16px;
+      color: var(--muted);
+      font-weight:900;
+      line-height:1.25;
+    }
+
+    /* Completion overlay + confetti canvas */
+    .overlay{
+      position:fixed;
+      inset:0;
+      background: rgba(31,42,55,.45);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 18px;
+      z-index: 1000;
+    }
+    .overlay.show{ display:flex; }
+
+    #confettiCanvas{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index: 1001;
+      display:none;
+    }
+    #confettiCanvas.show{ display:block; }
+
+    .modal{
+      width: min(860px, 100%);
+      background: rgba(255,255,255,.96);
+      border-radius: 22px;
+      box-shadow: 0 26px 80px rgba(0,0,0,.25);
+      border: 1px solid rgba(31,42,55,.12);
+      overflow:hidden;
+      z-index: 1002;
+      position:relative;
+    }
+    .modal-hd{
+      padding: 16px 16px 12px;
+      background: linear-gradient(135deg, rgba(124,218,122,.22), rgba(127,228,255,.18));
+      border-bottom: 1px solid rgba(31,42,55,.10);
+    }
+    .modal-hd h2{
+      margin:0;
+      font-size: 28px;
+      font-weight: 950;
+    }
+    .modal-bd{
+      padding: 16px;
+      font-size: 20px;
+      color: var(--ink);
+      line-height:1.35;
+      font-weight:800;
+    }
+    .modal-actions{
+      padding: 14px 16px 16px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      border-top: 1px solid rgba(31,42,55,.10);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <div class="badge">?</div>
+        <div>
+          <h1>Unlock the Picture: Sequence Mission</h1>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btnRestart" class="btn-ghost" type="button">Restart</button>
+        <button id="btnNewMission" class="btn-ghost" type="button">New mission (random)</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- Left: Activity -->
+      <div class="card" id="leftCard">
+        <div class="card-hd">
+          <div class="progress">
+            <div><strong>Set:</strong> <span id="setLabel">1</span> / 4</div>
+            <div><strong>Question:</strong> <span id="qLabel">1</span> / <span id="qTotalLabel">1</span></div>
+            <div><strong>Pieces:</strong> <span id="pieceCountTop">0</span> / 4</div>
+          </div>
+        </div>
+
+        <div class="card-bd" id="activityArea"></div>
+      </div>
+
+      <!-- Right: Puzzle -->
+      <div class="card">
+        <div class="card-hd">
+          <p class="puzzle-title">Picture Reward</p>
+          <div class="puzzle-sub">Collect 4 pieces to complete the picture.</div>
+        </div>
+
+        <div class="puzzle-wrap">
+          <div class="puzzle" aria-label="puzzle board">
+            <div class="piece" id="piece0" title="Piece 1">
+              <svg viewBox="0 0 100 100" role="img" aria-label="Sun and sky">
+                <defs>
+                  <linearGradient id="sky1" x1="0" x2="1">
+                    <stop offset="0" stop-color="#8fe8ff"/>
+                    <stop offset="1" stop-color="#fff1a8"/>
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="100" height="100" rx="16" fill="url(#sky1)"/>
+                <circle cx="72" cy="28" r="14" fill="#ffd56a" opacity=".95"/>
+                <g opacity=".9">
+                  <circle cx="25" cy="30" r="8" fill="#ffffff"/>
+                  <circle cx="33" cy="30" r="10" fill="#ffffff"/>
+                  <circle cx="42" cy="32" r="8" fill="#ffffff"/>
+                </g>
+                <path d="M0,78 C20,65 40,92 60,78 C78,66 92,80 100,74 L100,100 L0,100 Z" fill="#7cda7a" opacity=".95"/>
+              </svg>
+              <div class="lock">Locked</div>
+            </div>
+
+            <div class="piece" id="piece1" title="Piece 2">
+              <svg viewBox="0 0 100 100" role="img" aria-label="Rainbow">
+                <rect x="0" y="0" width="100" height="100" rx="16" fill="#ffffff"/>
+                <path d="M15,90 A35,35 0 0 1 85,90" fill="none" stroke="#ff7aa2" stroke-width="10" stroke-linecap="round"/>
+                <path d="M20,90 A30,30 0 0 1 80,90" fill="none" stroke="#ffd56a" stroke-width="10" stroke-linecap="round"/>
+                <path d="M25,90 A25,25 0 0 1 75,90" fill="none" stroke="#7cda7a" stroke-width="10" stroke-linecap="round"/>
+                <path d="M30,90 A20,20 0 0 1 70,90" fill="none" stroke="#73d7f1" stroke-width="10" stroke-linecap="round"/>
+                <g opacity=".85">
+                  <circle cx="25" cy="28" r="7" fill="#fff1a8"/>
+                  <circle cx="72" cy="25" r="8" fill="#8fe8ff"/>
+                  <circle cx="62" cy="35" r="5" fill="#ffd56a"/>
+                </g>
+              </svg>
+              <div class="lock">Locked</div>
+            </div>
+
+            <div class="piece" id="piece2" title="Piece 3">
+              <svg viewBox="0 0 100 100" role="img" aria-label="Flowers">
+                <defs>
+                  <linearGradient id="meadow" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#e9fbff"/>
+                    <stop offset=".55" stop-color="#ffffff"/>
+                    <stop offset="1" stop-color="#b7f5a4"/>
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="100" height="100" rx="16" fill="url(#meadow)"/>
+                <g transform="translate(18,40)">
+                  <rect x="16" y="18" width="6" height="28" rx="3" fill="#2f9e44"/>
+                  <circle cx="19" cy="15" r="10" fill="#ff7aa2"/>
+                  <circle cx="14" cy="14" r="4" fill="#ffd56a"/>
+                  <circle cx="24" cy="14" r="4" fill="#ffd56a"/>
+                  <circle cx="19" cy="19" r="4" fill="#ffd56a"/>
+                  <circle cx="19" cy="15" r="4" fill="#ffd56a"/>
+                </g>
+                <g transform="translate(54,44)">
+                  <rect x="14" y="16" width="6" height="30" rx="3" fill="#2f9e44"/>
+                  <circle cx="17" cy="14" r="10" fill="#73d7f1"/>
+                  <circle cx="12" cy="13" r="4" fill="#ffd56a"/>
+                  <circle cx="22" cy="13" r="4" fill="#ffd56a"/>
+                  <circle cx="17" cy="18" r="4" fill="#ffd56a"/>
+                  <circle cx="17" cy="14" r="4" fill="#ffd56a"/>
+                </g>
+              </svg>
+              <div class="lock">Locked</div>
+            </div>
+
+            <div class="piece" id="piece3" title="Piece 4">
+              <svg viewBox="0 0 100 100" role="img" aria-label="Tree and house">
+                <rect x="0" y="0" width="100" height="100" rx="16" fill="#fff4d6"/>
+                <rect x="0" y="70" width="100" height="30" fill="#7cda7a" opacity=".95"/>
+                <rect x="12" y="54" width="26" height="18" rx="4" fill="#ffffff" stroke="#1f2a37" stroke-opacity=".18"/>
+                <path d="M10,56 L25,44 L40,56 Z" fill="#ff7aa2" opacity=".95"/>
+                <rect x="22" y="62" width="7" height="10" rx="2" fill="#ffd56a" opacity=".95"/>
+                <rect x="67" y="55" width="8" height="20" rx="3" fill="#a36a3c"/>
+                <circle cx="71" cy="45" r="16" fill="#2bb3d6" opacity=".25"/>
+                <circle cx="63" cy="45" r="14" fill="#7cda7a" opacity=".95"/>
+                <circle cx="78" cy="46" r="12" fill="#7cda7a" opacity=".95"/>
+                <circle cx="70" cy="34" r="12" fill="#7cda7a" opacity=".95"/>
+              </svg>
+              <div class="lock">Locked</div>
+            </div>
+          </div>
+
+          <div class="tip" id="tipText">
+            Tip: Each set has some questions. Answer all the questions correctly to unlock a picture piece.
+            You have 2 tries for each question at most.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Completion modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+      <div class="modal-hd">
+        <h2 id="doneTitle">Congratulations!</h2>
+      </div>
+      <div class="modal-bd">
+        You collected all 4 picture pieces and completed the picture.<br /><br />
+        Please take a <strong>photo</strong> with your completed picture (all 4 pieces) and send it to <strong>Ms. AS</strong>.
+        You will receive <strong>2 more stamps</strong>.
+      </div>
+      <div class="modal-actions">
+        <button id="btnClose" class="btn-ghost" type="button">Close</button>
+        <button id="btnPlayAgain" class="btn-next" type="button">Play again (new random)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Helpers ----------
+    function randInt(min, max){
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    function shuffle(arr){
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    function formatNumber(n){
+      const s = String(n);
+      if (s.length <= 4) return s;
+      let out = "", count = 0;
+      for (let i = s.length - 1; i >= 0; i--){
+        out = s[i] + out;
+        count++;
+        if (count === 3 && i !== 0){
+          out = " " + out;
+          count = 0;
+        }
+      }
+      return out;
+    }
+
+    // Safe-ish evaluator for arithmetic expressions.
+    // Allowed: digits, + - * / ( ) . spaces
+    // Also support: ×, x, X, :, ÷, – (unicode dash)
+    function evalExpression(expr){
+      let s = expr;
+      s = s.replace(/\s+/g, "");
+      s = s.replace(/×/g, "*").replace(/[xX]/g, "*");
+      s = s.replace(/[:÷]/g, "/");
+      s = s.replace(/–/g, "-");
+      if (s === "") return { ok:false, value: NaN };
+      if (!/^[0-9+\-*/().]+$/.test(s)) return { ok:false, value: NaN };
+      if (/\*\*|\/\/|\.\./.test(s)) return { ok:false, value: NaN };
+      try{
+        const val = Function('"use strict";return (' + s + ')')();
+        if (typeof val !== "number" || !isFinite(val)) return { ok:false, value: NaN };
+        return { ok:true, value: val };
+      } catch(e){
+        return { ok:false, value: NaN };
+      }
+    }
+
+    function parseIntSafe(s){
+      const v = String(s || "").trim().replace(/\s+/g,"");
+      if (!/^-?\d+$/.test(v)) return NaN;
+      return Number(v);
+    }
+
+    // ---------- Sequence question generator (small numbers) ----------
+    function makeSequenceQuestion(){
+      const a1 = randInt(2, 19);   // < 20
+      const d  = randInt(2, 9);    // < 10
+      const n  = randInt(6, 25);
+      const x  = a1 + (n - 1) * d;
+
+      const t1 = a1;
+      const t2 = a1 + d;
+      const t3 = a1 + 2*d;
+      const t4 = a1 + 3*d;
+
+      const diff = x - a1;
+      const gaps = diff / d;
+      const pos  = gaps + 1;
+
+      return {
+        a1,d,n,x,t1,t2,t3,t4,diff,gaps,pos,
+        attempts:0,
+        showHints:false,
+        completed:false
+      };
+    }
+
+    // ---------- Set 1 vocab matching ----------
+    const vocabPairs = [
+      { en: "sequence",            vi: "dãy số, dãy hình" },
+      { en: "sequence of numbers", vi: "dãy số" },
+      { en: "term",                vi: "số hạng" },
+      { en: "consecutive",         vi: "liên tiếp" },
+      { en: "gap",                 vi: "khoảng cách (hiệu giữa hai số hạng liên tiếp)" },
+      { en: "difference",          vi: "hiệu" },
+      { en: "position",            vi: "vị trí" }
+    ];
+
+    // ---------- Mission structure ----------
+    function buildMission(){
+      const set1 = {
+        type:"match",
+        title:"Set 1 — Vocabulary Match",
+        instruction:"Match the English word to its Vietnamese meaning. Click a word, then click its meaning. When finished, click Check.",
+        questions:[{
+          attempts:0, showHints:false, completed:false,
+          enList: shuffle(vocabPairs.map(p=>p.en)),
+          viList: shuffle(vocabPairs.map(p=>p.vi)),
+          correctMap: (() => {
+            const m = new Map();
+            vocabPairs.forEach(p => m.set(p.en, p.vi));
+            return m;
+          })(),
+          selection: { en:null },
+          assigned: new Map(),
+          wrongEn: new Set()
+        }]
+      };
+
+      const set2 = {
+        type:"drag",
+        title:"Set 2 — Number Tiles (1 question)",
+        instruction:"Drag (or click) the number tiles into the blanks. Then click Check.",
+        questions:[ makeSequenceQuestion() ]
+      };
+
+      const set3 = {
+        type:"fill",
+        title:"Set 3 — Fill in the Blanks",
+        instruction:"Fill in the blanks. Then click Check.",
+        questions:[ makeSequenceQuestion(), makeSequenceQuestion() ]
+      };
+
+      const set4 = {
+        type:"equation",
+        title:"Set 4 — Show Your Work",
+        instruction:"Fill in the first term and the gap. Then type an equation to show your work and type the answer number. Then click Check.",
+        questions:[ makeSequenceQuestion(), makeSequenceQuestion() ] // ONLY 2 questions now
+      };
+
+      return { sets:[set1,set2,set3,set4] };
+    }
+
+    // ---------- State ----------
+    let mission = buildMission();
+    let setIdx = 0;
+    let qIdx = 0;
+    let unlocked = [false,false,false,false];
+
+    // ---------- UI helpers ----------
+    function piecesCount(){
+      return unlocked.filter(Boolean).length;
+    }
+    function updatePuzzle(){
+      const count = piecesCount();
+      document.getElementById("pieceCountTop").textContent = count;
+      for (let i=0;i<4;i++){
+        const el = document.getElementById("piece"+i);
+        if (unlocked[i]) el.classList.add("unlocked");
+        else el.classList.remove("unlocked");
+      }
+    }
+
+    // ---------- Confetti (canvas) ----------
+    let confettiRAF = null;
+    let confettiParticles = [];
+    function startConfetti(){
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      function resize(){
+        canvas.width = window.innerWidth * devicePixelRatio;
+        canvas.height = window.innerHeight * devicePixelRatio;
+      }
+      resize();
+      window.addEventListener("resize", resize, { passive:true });
+
+      canvas.classList.add("show");
+
+      confettiParticles = [];
+      const colors = ["#2bb3d6","#7cda7a","#ffd56a","#ff7aa2","#8fe8ff","#b7f5a4"];
+      const count = 220;
+
+      for (let i=0;i<count;i++){
+        confettiParticles.push({
+          x: Math.random() * canvas.width,
+          y: -Math.random() * canvas.height,
+          r: (6 + Math.random()*10) * devicePixelRatio,
+          c: colors[i % colors.length],
+          vx: (-2 + Math.random()*4) * devicePixelRatio,
+          vy: (3 + Math.random()*7) * devicePixelRatio,
+          rot: Math.random() * Math.PI,
+          vr: (-0.08 + Math.random()*0.16),
+          shape: Math.random() < 0.5 ? "rect" : "circle"
+        });
+      }
+
+      function tick(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for (const p of confettiParticles){
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+
+          if (p.y > canvas.height + 40*devicePixelRatio){
+            p.y = -40*devicePixelRatio;
+            p.x = Math.random() * canvas.width;
+          }
+          if (p.x < -40*devicePixelRatio) p.x = canvas.width + 40*devicePixelRatio;
+          if (p.x > canvas.width + 40*devicePixelRatio) p.x = -40*devicePixelRatio;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.c;
+          if (p.shape === "rect"){
+            ctx.fillRect(-p.r/2, -p.r/3, p.r, p.r/1.5);
+          } else {
+            ctx.beginPath();
+            ctx.arc(0,0,p.r/3,0,Math.PI*2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+        confettiRAF = requestAnimationFrame(tick);
+      }
+      tick();
+    }
+
+    function stopConfetti(){
+      const canvas = document.getElementById("confettiCanvas");
+      canvas.classList.remove("show");
+      if (confettiRAF) cancelAnimationFrame(confettiRAF);
+      confettiRAF = null;
+      confettiParticles = [];
+    }
+
+    function showDone(){
+      document.getElementById("overlay").classList.add("show");
+      startConfetti();
+    }
+    function closeDone(){
+      document.getElementById("overlay").classList.remove("show");
+      stopConfetti();
+    }
+
+    // ---------- Reset logic ----------
+    function resetEntireMissionKeepQuestions(){
+      setIdx = 0;
+      qIdx = 0;
+      unlocked = [false,false,false,false];
+
+      mission.sets.forEach(s=>{
+        s.questions.forEach(q=>{
+          q.completed = false;
+          q.attempts = 0;
+          q.showHints = false;
+          if (s.type === "match"){
+            q.selection = { en:null };
+            q.assigned = new Map();
+            q.wrongEn = new Set();
+          }
+          delete q.inputs;
+          delete q.mark;
+          delete q.eq;
+          delete q.tiles;
+          delete q.blanks;
+          delete q.selectedTileId;
+        });
+      });
+      updatePuzzle();
+      render();
+    }
+
+    function resetCurrentSetOnly(){
+      const set = mission.sets[setIdx];
+      set.questions.forEach(q=>{
+        q.completed = false;
+        q.attempts = 0;
+        q.showHints = false;
+        if (set.type === "match"){
+          q.selection = { en:null };
+          q.assigned = new Map();
+          q.wrongEn = new Set();
+        }
+        delete q.inputs;
+        delete q.mark;
+        delete q.eq;
+        delete q.tiles;
+        delete q.blanks;
+        delete q.selectedTileId;
+      });
+      qIdx = 0;
+      render();
+      setStatus("Oops! You used 2 tries. This set restarts from the beginning.", "bad");
+    }
+
+    function newMission(){
+      mission = buildMission();
+      setIdx = 0;
+      qIdx = 0;
+      unlocked = [false,false,false,false];
+      updatePuzzle();
+      render();
+    }
+
+    // ---------- status bar ----------
+    function setStatus(text, kind){
+      const el = document.getElementById("statusBar");
+      if (!el) return;
+      el.classList.remove("ok","bad");
+      if (kind === "ok") el.classList.add("ok");
+      if (kind === "bad") el.classList.add("bad");
+      el.innerHTML = '<div class="dot"></div><div>' + text + '</div>';
+    }
+
+    function triesLeftText(attempts){
+      const left = Math.max(0, 2 - attempts);
+      return "Tries left: " + left + " / 2";
+    }
+
+    // ---------- Render ----------
+    function render(){
+      const set = mission.sets[setIdx];
+      const q = set.questions[qIdx];
+
+      document.getElementById("setLabel").textContent = (setIdx + 1);
+      document.getElementById("qLabel").textContent = (qIdx + 1);
+      document.getElementById("qTotalLabel").textContent = set.questions.length;
+
+      updatePuzzle();
+
+      const area = document.getElementById("activityArea");
+      area.innerHTML = "";
+
+      const titleRow = document.createElement("div");
+      titleRow.className = "question";
+      titleRow.textContent = set.title;
+      area.appendChild(titleRow);
+
+      if (set.type !== "match"){
+        const seq = document.createElement("div");
+        seq.className = "sequence";
+        seq.textContent = [
+          formatNumber(q.t1),
+          formatNumber(q.t2),
+          formatNumber(q.t3),
+          formatNumber(q.t4),
+          "…",
+          formatNumber(q.x)
+        ].join(", ");
+        area.appendChild(seq);
+
+        const mainQ = document.createElement("div");
+        mainQ.className = "question";
+        mainQ.innerHTML = 'What is the position of number <span class="chip">'+ formatNumber(q.x) +'</span>?';
+        area.appendChild(mainQ);
+      }
+
+      const instr = document.createElement("div");
+      instr.className = "instruction";
+      instr.innerHTML = '<div>' + set.instruction + '</div>' +
+                        '<div class="tries" id="triesText">' + triesLeftText(q.attempts || 0) + '</div>';
+      area.appendChild(instr);
+
+      const status = document.createElement("div");
+      status.className = "status";
+      status.id = "statusBar";
+      status.innerHTML = '<div class="dot"></div><div>Ready. Click “Check” when you finish.</div>';
+      area.appendChild(status);
+
+      if (set.type === "match"){
+        renderMatch(area, set, q);
+      } else if (set.type === "drag"){
+        renderDrag(area, set, q);
+      } else if (set.type === "fill"){
+        renderFill(area, set, q);
+      } else if (set.type === "equation"){
+        renderEquation(area, set, q);
+      }
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const btnCheck = document.createElement("button");
+      btnCheck.className = "btn-primary";
+      btnCheck.textContent = "Check";
+      btnCheck.type = "button";
+      btnCheck.addEventListener("click", ()=>checkCurrent());
+      actions.appendChild(btnCheck);
+
+      const btnNext = document.createElement("button");
+      btnNext.className = "btn-next";
+      btnNext.textContent = (isLastQuestionOfLastSet() ? "Finish" : "Next");
+      btnNext.type = "button";
+      btnNext.disabled = !q.completed;
+      btnNext.id = "btnNext";
+      btnNext.addEventListener("click", ()=>goNext());
+      actions.appendChild(btnNext);
+
+      area.appendChild(actions);
+
+      const triesEl = document.getElementById("triesText");
+      if (triesEl) triesEl.textContent = triesLeftText(q.attempts || 0);
+
+      applyHintsVisibility(q);
+    }
+
+    function applyHintsVisibility(q){
+      const show = !!q.showHints;
+      document.querySelectorAll(".hint").forEach(h=>{
+        if (show) h.classList.add("show");
+        else h.classList.remove("show");
+      });
+    }
+
+    function isLastQuestionOfLastSet(){
+      return (setIdx === mission.sets.length - 1) && (qIdx === mission.sets[setIdx].questions.length - 1);
+    }
+
+    // ---------- Set 1: Matching ----------
+    function renderMatch(area, set, q){
+      const grid = document.createElement("div");
+      grid.className = "match-grid";
+
+      const colEn = document.createElement("div");
+      colEn.className = "match-col";
+      colEn.innerHTML = '<div class="match-head">English</div>';
+      const listEn = document.createElement("div");
+      listEn.className = "match-list";
+
+      q.enList.forEach(en=>{
+        const item = document.createElement("div");
+        item.className = "card-item";
+        item.dataset.kind = "en";
+        item.dataset.value = en;
+
+        const left = document.createElement("div");
+        left.textContent = en;
+
+        const right = document.createElement("div");
+        const assigned = q.assigned.get(en);
+        if (assigned){
+          right.innerHTML = '<span class="mini-chip assigned">' + assigned + ' (click to remove)</span>';
+        } else {
+          right.innerHTML = '<span class="mini-chip">Pick meaning</span>';
+        }
+
+        item.appendChild(left);
+        item.appendChild(right);
+
+        if (q.selection.en === en) item.classList.add("selected");
+        if (q.completed) item.classList.add("matched");
+        if (q.wrongEn && q.wrongEn.has(en)) item.classList.add("wrong");
+
+        item.addEventListener("click", ()=>{
+          if (q.completed) return;
+          if (q.assigned.has(en)){
+            q.assigned.delete(en);
+            q.wrongEn.delete(en);
+            q.selection.en = null;
+          } else {
+            q.selection.en = (q.selection.en === en) ? null : en;
+          }
+          render();
+        });
+
+        listEn.appendChild(item);
+      });
+      colEn.appendChild(listEn);
+
+      const colVi = document.createElement("div");
+      colVi.className = "match-col";
+      colVi.innerHTML = '<div class="match-head">Vietnamese meaning</div>';
+      const listVi = document.createElement("div");
+      listVi.className = "match-list";
+
+      const usedVi = new Set(Array.from(q.assigned.values()));
+      q.viList.forEach(vi=>{
+        const item = document.createElement("div");
+        item.className = "card-item small";
+        item.dataset.kind = "vi";
+        item.dataset.value = vi;
+        item.innerHTML = '<div>'+vi+'</div><div class="mini-chip">'+ (usedVi.has(vi) ? "Used" : "Click") +'</div>';
+        if (usedVi.has(vi)) item.classList.add("matched");
+
+        item.addEventListener("click", ()=>{
+          if (q.completed) return;
+          if (!q.selection.en) return;
+          if (usedVi.has(vi)) return;
+
+          q.assigned.set(q.selection.en, vi);
+          q.selection.en = null;
+          render();
+        });
+
+        listVi.appendChild(item);
+      });
+      colVi.appendChild(listVi);
+
+      grid.appendChild(colEn);
+      grid.appendChild(colVi);
+      area.appendChild(grid);
+    }
+
+    // ---------- Set 2: Drag numbers (answer tiles only, allow duplicates by id) ----------
+    function initDragIfNeeded(q){
+      if (q.tiles) return;
+      const values = [q.a1, q.d, q.diff, q.gaps, q.pos];
+      q.tiles = values.map((v, idx)=>({ id: "t" + idx + "_" + Math.random().toString(16).slice(2), value: v, used:false }));
+      q.blanks = { a1:null, d:null, diff:null, gaps:null, pos:null }; // tileId
+      q.selectedTileId = null;
+    }
+    function tileById(q, id){
+      return q.tiles.find(t => t.id === id) || null;
+    }
+    function placeTileId(q, blankKey, tileId){
+      const tile = tileById(q, tileId);
+      if (!tile || tile.used) return;
+
+      if (q.blanks[blankKey]){
+        const prev = tileById(q, q.blanks[blankKey]);
+        if (prev) prev.used = false;
+      }
+      q.blanks[blankKey] = tileId;
+      tile.used = true;
+    }
+    function clearBlank(q, blankKey){
+      const tileId = q.blanks[blankKey];
+      if (!tileId) return;
+      const t = tileById(q, tileId);
+      if (t) t.used = false;
+      q.blanks[blankKey] = null;
+    }
+
+    function renderDrag(area, set, q){
+      initDragIfNeeded(q);
+
+      const rows = document.createElement("div");
+      rows.className = "rows";
+
+      const rowData = [
+        { key:"a1",  label:"The first term =", hint:"Look at the first number in the sequence." },
+        { key:"d",   label:"The gap (difference between consecutive terms) =", hint:"Find the difference between two consecutive terms." },
+        { key:"diff",label:`The difference between the first term and ${formatNumber(q.x)} is`, hint:`Compute: ${formatNumber(q.x)} – first term` },
+        { key:"gaps",label:`There are ______ gap(s) between the first term and ${formatNumber(q.x)}.`, hint:`Compute: (${formatNumber(q.x)} – first term) : gap` },
+        { key:"pos", label:`The position of ${formatNumber(q.x)} is`, hint:"Compute: number of gaps + 1" }
+      ];
+
+      rowData.forEach(r=>{
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const left = document.createElement("div");
+        const labelClass = (r.key === "d") ? "label small" : "label";
+        left.innerHTML = `<div class="${labelClass}">${r.label}</div><div class="hint">${r.hint}</div>`;
+
+        const blank = document.createElement("div");
+        const tileId = q.blanks[r.key];
+        const tile = tileId ? tileById(q, tileId) : null;
+
+        blank.className = "blank" + (tile ? " filled" : "");
+        blank.dataset.key = r.key;
+        blank.innerHTML = tile ? formatNumber(tile.value) : '<span class="ph">Drop / click a number</span>';
+
+        blank.addEventListener("dragover", (e)=>{ e.preventDefault(); });
+        blank.addEventListener("drop", (e)=>{
+          e.preventDefault();
+          const id = e.dataTransfer.getData("text/plain");
+          if (!id) return;
+          placeTileId(q, r.key, id);
+          q.selectedTileId = null;
+          render();
+        });
+
+        blank.addEventListener("click", ()=>{
+          if (q.completed) return;
+
+          if (q.selectedTileId){
+            placeTileId(q, r.key, q.selectedTileId);
+            q.selectedTileId = null;
+            render();
+            return;
+          }
+          if (q.blanks[r.key]){
+            clearBlank(q, r.key);
+            render();
+          }
+        });
+
+        row.appendChild(left);
+        row.appendChild(blank);
+        rows.appendChild(row);
+      });
+
+      area.appendChild(rows);
+
+      const tileArea = document.createElement("div");
+      tileArea.className = "tile-area";
+
+      const title = document.createElement("div");
+      title.className = "tile-title";
+      title.textContent = "Number tiles:";
+      tileArea.appendChild(title);
+
+      q.tiles.forEach(t=>{
+        const el = document.createElement("div");
+        el.className = "tile" + (t.used ? " used" : "") + (q.selectedTileId === t.id ? " selected" : "");
+        el.textContent = formatNumber(t.value);
+        el.draggable = !t.used;
+
+        el.addEventListener("dragstart", (e)=>{
+          if (t.used) { e.preventDefault(); return; }
+          e.dataTransfer.setData("text/plain", t.id);
+        });
+
+        el.addEventListener("click", ()=>{
+          if (q.completed) return;
+          if (t.used) return;
+          q.selectedTileId = (q.selectedTileId === t.id) ? null : t.id;
+          render();
+        });
+
+        tileArea.appendChild(el);
+      });
+
+      area.appendChild(tileArea);
+    }
+
+    // ---------- Set 3: Fill blanks ----------
+    function renderFill(area, set, q){
+      if (!q.inputs){
+        q.inputs = { a1:"", d:"", diff:"", gaps:"", pos:"" };
+        q.mark = { a1:null, d:null, diff:null, gaps:null, pos:null };
+      }
+
+      const rows = document.createElement("div");
+      rows.className = "rows";
+
+      const rowData = [
+        { key:"a1",  label:"The first term =", hint:"Look at the first number in the sequence." },
+        { key:"d",   label:"The gap (difference between consecutive terms) =", hint:"Find the difference between two consecutive terms." },
+        { key:"diff",label:`The difference between the first term and ${formatNumber(q.x)} is`, hint:`Compute: ${formatNumber(q.x)} – first term` },
+        { key:"gaps",label:`There are ______ gap(s) between the first term and ${formatNumber(q.x)}.`, hint:`Compute: (${formatNumber(q.x)} – first term) : gap` },
+        { key:"pos", label:`The position of ${formatNumber(q.x)} is`, hint:"Compute: number of gaps + 1" }
+      ];
+
+      rowData.forEach(r=>{
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const left = document.createElement("div");
+        const labelClass = (r.key === "d") ? "label small" : "label";
+        left.innerHTML = `<div class="${labelClass}">${r.label}</div><div class="hint">${r.hint}</div>`;
+
+        const input = document.createElement("input");
+        input.className = "input";
+        input.inputMode = "numeric";
+        input.autocomplete = "off";
+        input.value = q.inputs[r.key];
+
+        if (q.mark[r.key] === true) input.classList.add("correct");
+        if (q.mark[r.key] === false) input.classList.add("wrong");
+
+        input.addEventListener("input", ()=>{
+          q.inputs[r.key] = input.value;
+          q.mark[r.key] = null;
+        });
+
+        row.appendChild(left);
+        row.appendChild(input);
+        rows.appendChild(row);
+      });
+
+      area.appendChild(rows);
+    }
+
+    // ---------- Set 4: first term + gap + equation + answer(number) ----------
+    function renderEquation(area, set, q){
+      if (!q.eq){
+        q.eq = { first:"", gap:"", work:"", ans:"" };
+        q.mark = { first:null, gap:null, work:null, ans:null };
+      }
+
+      const rows = document.createElement("div");
+      rows.className = "rows";
+
+      // 1) first term
+      const r1 = document.createElement("div");
+      r1.className = "row";
+      r1.innerHTML = `<div><div class="label">1. The first term is</div></div>`;
+      const inFirst = document.createElement("input");
+      inFirst.className = "input";
+      inFirst.inputMode = "numeric";
+      inFirst.placeholder = "";
+      inFirst.value = q.eq.first;
+      if (q.mark.first === true) inFirst.classList.add("correct");
+      if (q.mark.first === false) inFirst.classList.add("wrong");
+      inFirst.addEventListener("input", ()=>{
+        q.eq.first = inFirst.value;
+        q.mark.first = null;
+      });
+      r1.appendChild(inFirst);
+      rows.appendChild(r1);
+
+      // 2) gap
+      const r2 = document.createElement("div");
+      r2.className = "row";
+      r2.innerHTML = `<div><div class="label">2. The gap is</div></div>`;
+      const inGap = document.createElement("input");
+      inGap.className = "input";
+      inGap.inputMode = "numeric";
+      inGap.placeholder = "";
+      inGap.value = q.eq.gap;
+      if (q.mark.gap === true) inGap.classList.add("correct");
+      if (q.mark.gap === false) inGap.classList.add("wrong");
+      inGap.addEventListener("input", ()=>{
+        q.eq.gap = inGap.value;
+        q.mark.gap = null;
+      });
+      r2.appendChild(inGap);
+      rows.appendChild(r2);
+
+      // 3) equation (full width + small text)
+      const r3 = document.createElement("div");
+      r3.className = "row stack";
+      const r3label = document.createElement("div");
+      r3label.innerHTML =
+        `<div class="label">Write an equation to show your work</div>
+         <div class="helper">Example: (9-3):3+1=3</div>`;
+      const inWork = document.createElement("input");
+      inWork.className = "input smalltext";
+      inWork.placeholder = "(9-3):3+1=3";
+      inWork.value = q.eq.work;
+      if (q.mark.work === true) inWork.classList.add("correct");
+      if (q.mark.work === false) inWork.classList.add("wrong");
+      inWork.addEventListener("input", ()=>{
+        q.eq.work = inWork.value;
+        q.mark.work = null;
+      });
+      r3.appendChild(r3label);
+      r3.appendChild(inWork);
+      rows.appendChild(r3);
+
+      // 4) answer number only
+      const r4 = document.createElement("div");
+      r4.className = "row";
+      r4.innerHTML =
+        `<div>
+          <div class="label">Answer</div>
+          <div class="helper">Example: 3</div>
+        </div>`;
+      const inAns = document.createElement("input");
+      inAns.className = "input";
+      inAns.inputMode = "numeric";
+      inAns.placeholder = "3";
+      inAns.value = q.eq.ans;
+      if (q.mark.ans === true) inAns.classList.add("correct");
+      if (q.mark.ans === false) inAns.classList.add("wrong");
+      inAns.addEventListener("input", ()=>{
+        q.eq.ans = inAns.value;
+        q.mark.ans = null;
+      });
+      r4.appendChild(inAns);
+      rows.appendChild(r4);
+
+      area.appendChild(rows);
+    }
+
+    // ---------- Checking logic ----------
+    function expectedValues(q){
+      return { a1:q.a1, d:q.d, diff:q.diff, gaps:q.gaps, pos:q.pos };
+    }
+
+    function checkCurrent(){
+      const set = mission.sets[setIdx];
+      const q = set.questions[qIdx];
+
+      setStatus("Checking...", "");
+
+      let ok = false;
+
+      if (set.type === "match"){
+        ok = checkMatch(q);
+      } else if (set.type === "drag"){
+        ok = checkDrag(q);
+      } else if (set.type === "fill"){
+        ok = checkFill(q);
+      } else if (set.type === "equation"){
+        ok = checkEquation(q);
+      }
+
+      if (ok){
+        q.completed = true;
+        setStatus("Correct. Click “Next”.", "ok");
+        const btnNext = document.getElementById("btnNext");
+        if (btnNext) btnNext.disabled = false;
+      } else {
+        q.attempts = (q.attempts || 0) + 1;
+        q.showHints = true;
+        const triesLeft = 2 - q.attempts;
+
+        if (triesLeft <= 0){
+          resetCurrentSetOnly();
+          return;
+        } else {
+          setStatus("Not yet. Try again. " + triesLeftText(q.attempts), "bad");
+          const btnNext = document.getElementById("btnNext");
+          if (btnNext) btnNext.disabled = true;
+        }
+      }
+
+      const triesEl = document.getElementById("triesText");
+      if (triesEl) triesEl.textContent = triesLeftText(q.attempts || 0);
+
+      applyHintsVisibility(q);
+    }
+
+    function checkMatch(q){
+      q.wrongEn = new Set();
+      if (q.assigned.size !== q.enList.length){
+        q.enList.forEach(en=>{
+          if (!q.assigned.has(en)) q.wrongEn.add(en);
+        });
+        render();
+        return false;
+      }
+      let allOk = true;
+      q.enList.forEach(en=>{
+        const chosen = q.assigned.get(en);
+        const correct = q.correctMap.get(en);
+        if (chosen !== correct){
+          q.wrongEn.add(en);
+          allOk = false;
+        }
+      });
+      render();
+      return allOk;
+    }
+
+    function checkDrag(q){
+      const keys = ["a1","d","diff","gaps","pos"];
+      const allFilled = keys.every(k => q.blanks && q.blanks[k]);
+
+      document.querySelectorAll(".blank").forEach(b=>{
+        b.classList.remove("correct","wrong");
+      });
+
+      if (!allFilled){
+        render();
+        return false;
+      }
+
+      const exp = expectedValues(q);
+      let allOk = true;
+
+      keys.forEach(k=>{
+        const tileId = q.blanks[k];
+        const tile = tileId ? tileById(q, tileId) : null;
+        const ok = tile && (tile.value === exp[k]);
+        if (!ok) allOk = false;
+        const blankEl = document.querySelector('.blank[data-key="'+k+'"]');
+        if (blankEl){
+          blankEl.classList.add(ok ? "correct" : "wrong");
+        }
+      });
+
+      return allOk;
+    }
+
+    function checkFill(q){
+      const exp = expectedValues(q);
+
+      const a1 = parseIntSafe(q.inputs.a1);
+      const d  = parseIntSafe(q.inputs.d);
+      const diff = parseIntSafe(q.inputs.diff);
+      const gaps = parseIntSafe(q.inputs.gaps);
+      const pos  = parseIntSafe(q.inputs.pos);
+
+      const okA1 = (a1 === exp.a1);
+      const okD  = (d === exp.d);
+      const okDiff = (diff === exp.diff);
+      const okGaps = (gaps === exp.gaps);
+      const okPos  = (pos === exp.pos);
+
+      q.mark.a1 = okA1;
+      q.mark.d = okD;
+      q.mark.diff = okDiff;
+      q.mark.gaps = okGaps;
+      q.mark.pos = okPos;
+
+      render();
+      return (okA1 && okD && okDiff && okGaps && okPos);
+    }
+
+    function checkEquation(q){
+      const expectedPos = q.pos;
+
+      // first term + gap
+      const first = parseIntSafe(q.eq.first);
+      const gap = parseIntSafe(q.eq.gap);
+      const okFirst = (first === q.a1);
+      const okGap = (gap === q.d);
+
+      // equation must contain "=" and be true; one side equals expectedPos
+      const raw = String(q.eq.work || "");
+      const cleaned = raw.replace(/\s+/g,"");
+      let okWork = false;
+
+      if (cleaned.includes("=")){
+        const parts = cleaned.split("=");
+        if (parts.length === 2){
+          const left = evalExpression(parts[0]);
+          const right = evalExpression(parts[1]);
+          if (left.ok && right.ok){
+            const same = Math.abs(left.value - right.value) < 1e-9;
+            const equalsExpected =
+              Math.abs(right.value - expectedPos) < 1e-9 || Math.abs(left.value - expectedPos) < 1e-9;
+            okWork = same && equalsExpected;
+          }
+        }
+      }
+
+      // answer (number only)
+      const ans = parseIntSafe(q.eq.ans);
+      const okAns = (ans === expectedPos);
+
+      q.mark.first = okFirst;
+      q.mark.gap = okGap;
+      q.mark.work = okWork;
+      q.mark.ans = okAns;
+
+      render();
+      return okFirst && okGap && okWork && okAns;
+    }
+
+    // ---------- Progression ----------
+    function goNext(){
+      const set = mission.sets[setIdx];
+      const q = set.questions[qIdx];
+      if (!q.completed) return;
+
+      if (qIdx < set.questions.length - 1){
+        qIdx++;
+        render();
+        return;
+      }
+
+      const allDone = set.questions.every(qq => qq.completed);
+      if (allDone){
+        unlocked[setIdx] = true;
+        updatePuzzle();
+      }
+
+      if (setIdx < mission.sets.length - 1){
+        setIdx++;
+        qIdx = 0;
+        render();
+        return;
+      }
+
+      if (unlocked.every(Boolean)){
+        showDone();
+      } else {
+        showDone();
+      }
+    }
+
+    // ---------- Buttons ----------
+    document.getElementById("btnRestart").addEventListener("click", ()=>{
+      resetEntireMissionKeepQuestions();
+    });
+    document.getElementById("btnNewMission").addEventListener("click", ()=>{
+      newMission();
+    });
+    document.getElementById("btnClose").addEventListener("click", closeDone);
+    document.getElementById("btnPlayAgain").addEventListener("click", ()=>{
+      closeDone();
+      newMission();
+    });
+
+    // ---------- Init ----------
+    updatePuzzle();
+    render();
+  </script>
+</body>
+</html>
