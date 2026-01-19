@@ -69,7 +69,36 @@
       gap:10px;
       align-items:center;
       flex-wrap:wrap;
+      justify-content:flex-end;
     }
+    .nameBox{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background: rgba(255,255,255,.72);
+      border: 2px solid rgba(31,42,55,.10);
+      border-radius: 14px;
+      padding: 8px 10px;
+      box-shadow: 0 12px 26px rgba(31,42,55,.08);
+    }
+    .nameBox label{
+      font-weight:900;
+      color: var(--muted);
+      font-size:16px;
+      white-space:nowrap;
+    }
+    .nameBox input{
+      width: 220px;
+      max-width: 46vw;
+      border: 0;
+      outline: none;
+      background: transparent;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
     button{
       font-family:inherit;
       font-size:18px;
@@ -229,7 +258,7 @@
       align-items:center;
     }
     .row.stack{
-      grid-template-columns: 1fr; /* full-width input (Set 4 equation) */
+      grid-template-columns: 1fr;
       align-items:stretch;
     }
     @media (max-width: 680px){
@@ -240,13 +269,13 @@
       font-weight:900;
       line-height:1.15;
     }
-    .label.small{ font-size:19px; }
+    .nowrap{ white-space:nowrap; }
     .hint{
       margin-top:4px;
       font-size:16px;
       color:var(--muted);
       font-weight:700;
-      display:none; /* show after first wrong (except helper lines) */
+      display:none;
     }
     .hint.show{ display:block; }
 
@@ -269,8 +298,8 @@
       text-align:center;
     }
     .input.smalltext{
-      font-size:18px;       /* smaller text inside equation input */
-      text-align:left;      /* easier to read long equations */
+      font-size:18px;
+      text-align:left;
       padding-left:12px;
     }
     .input:focus{
@@ -286,7 +315,6 @@
       box-shadow: 0 0 0 6px rgba(226,74,74,.10);
     }
 
-    /* Drag tiles */
     .blank{
       width:100%;
       min-height: 46px;
@@ -305,7 +333,7 @@
       text-align:center;
     }
     .blank .ph{
-      font-size:16px;   /* Set 2: smaller placeholder */
+      font-size:16px;
       font-weight:850;
       color: rgba(31,42,55,.60);
     }
@@ -363,7 +391,6 @@
       border-color: rgba(43,179,214,.45);
     }
 
-    /* Matching */
     .match-grid{
       display:grid;
       grid-template-columns: 1fr 1fr;
@@ -435,7 +462,7 @@
       white-space:nowrap;
     }
     .mini-chip.assigned{
-      background: linear-gradient(135deg, rgba(43,179,214,.18), rgba(124,218,122,.18));
+      background: linear-gradient(135deg, rgba(255,213,106,.30), rgba(127,228,255,.22));
       border-color: rgba(43,179,214,.40);
       color: #0b3b4a;
     }
@@ -449,7 +476,6 @@
       margin-top: 2px;
     }
 
-    /* Puzzle */
     .puzzle-title{
       font-size:22px;
       font-weight:950;
@@ -524,7 +550,6 @@
       line-height:1.25;
     }
 
-    /* Completion overlay + confetti canvas */
     .overlay{
       position:fixed;
       inset:0;
@@ -598,13 +623,16 @@
       </div>
 
       <div class="controls">
+        <div class="nameBox" title="Student name">
+          <label for="studentName">Name</label>
+          <input id="studentName" placeholder="Type your name" />
+        </div>
         <button id="btnRestart" class="btn-ghost" type="button">Restart</button>
         <button id="btnNewMission" class="btn-ghost" type="button">New mission (random)</button>
       </div>
     </div>
 
     <div class="main">
-      <!-- Left: Activity -->
       <div class="card" id="leftCard">
         <div class="card-hd">
           <div class="progress">
@@ -613,11 +641,9 @@
             <div><strong>Pieces:</strong> <span id="pieceCountTop">0</span> / 4</div>
           </div>
         </div>
-
         <div class="card-bd" id="activityArea"></div>
       </div>
 
-      <!-- Right: Puzzle -->
       <div class="card">
         <div class="card-hd">
           <p class="puzzle-title">Picture Reward</p>
@@ -710,21 +736,19 @@
           </div>
 
           <div class="tip" id="tipText">
-            Tip: Each set has some questions. Answer all the questions correctly to unlock a picture piece.
-            You have 2 tries for each question at most.
+            Tip: Each set has some questions. Answer all the questions correctly to unlock a picture piece. You have 2 tries for each question at most.
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Completion modal -->
   <div class="overlay" id="overlay">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
       <div class="modal-hd">
         <h2 id="doneTitle">Congratulations!</h2>
       </div>
-      <div class="modal-bd">
+      <div class="modal-bd" id="doneBody">
         You collected all 4 picture pieces and completed the picture.<br /><br />
         Please take a <strong>photo</strong> with your completed picture (all 4 pieces) and send it to <strong>Ms. AS</strong>.
         You will receive <strong>2 more stamps</strong>.
@@ -737,6 +761,26 @@
   </div>
 
   <script>
+    /* =========================================================
+       TEACHER RESULTS (Google Form -> Google Sheet)
+       ---------------------------------------------------------
+       1) Create a Google Form with these short-answer fields:
+          - Student name
+          - Mission ID
+          - Completed (YES/NO)
+          - Time (ISO)
+          - Pieces (should be 4)
+
+       2) Get a pre-filled link to discover entry IDs (entry.xxxxx).
+       3) Paste your values below.
+       ========================================================= */
+    const FORM_POST_URL = ""; // Example: "https://docs.google.com/forms/d/e/XXXXXXX/formResponse"
+    const ENTRY_NAME = "";    // Example: "entry.1111111111"
+    const ENTRY_MISSION = ""; // Example: "entry.2222222222"
+    const ENTRY_COMPLETED = "";// Example: "entry.3333333333"
+    const ENTRY_TIME = "";    // Example: "entry.4444444444"
+    const ENTRY_PIECES = "";  // Example: "entry.5555555555"
+
     // ---------- Helpers ----------
     function randInt(min, max){
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -764,11 +808,9 @@
       return out;
     }
 
-    // Safe-ish evaluator for arithmetic expressions.
-    // Allowed: digits, + - * / ( ) . spaces
-    // Also support: ×, x, X, :, ÷, – (unicode dash)
+    // Expression evaluator: digits, + - * / ( ) . spaces; supports × x X : ÷ –
     function evalExpression(expr){
-      let s = expr;
+      let s = String(expr || "");
       s = s.replace(/\s+/g, "");
       s = s.replace(/×/g, "*").replace(/[xX]/g, "*");
       s = s.replace(/[:÷]/g, "/");
@@ -777,940 +819,5 @@
       if (!/^[0-9+\-*/().]+$/.test(s)) return { ok:false, value: NaN };
       if (/\*\*|\/\/|\.\./.test(s)) return { ok:false, value: NaN };
       try{
-        const val = Function('"use strict";return (' + s + ')')();
-        if (typeof val !== "number" || !isFinite(val)) return { ok:false, value: NaN };
-        return { ok:true, value: val };
-      } catch(e){
-        return { ok:false, value: NaN };
-      }
-    }
+        const
 
-    function parseIntSafe(s){
-      const v = String(s || "").trim().replace(/\s+/g,"");
-      if (!/^-?\d+$/.test(v)) return NaN;
-      return Number(v);
-    }
-
-    // ---------- Sequence question generator (small numbers) ----------
-    function makeSequenceQuestion(){
-      const a1 = randInt(2, 19);   // < 20
-      const d  = randInt(2, 9);    // < 10
-      const n  = randInt(6, 25);
-      const x  = a1 + (n - 1) * d;
-
-      const t1 = a1;
-      const t2 = a1 + d;
-      const t3 = a1 + 2*d;
-      const t4 = a1 + 3*d;
-
-      const diff = x - a1;
-      const gaps = diff / d;
-      const pos  = gaps + 1;
-
-      return {
-        a1,d,n,x,t1,t2,t3,t4,diff,gaps,pos,
-        attempts:0,
-        showHints:false,
-        completed:false
-      };
-    }
-
-    // ---------- Set 1 vocab matching ----------
-    const vocabPairs = [
-      { en: "sequence",            vi: "dãy số, dãy hình" },
-      { en: "sequence of numbers", vi: "dãy số" },
-      { en: "term",                vi: "số hạng" },
-      { en: "consecutive",         vi: "liên tiếp" },
-      { en: "gap",                 vi: "khoảng cách (hiệu giữa hai số hạng liên tiếp)" },
-      { en: "difference",          vi: "hiệu" },
-      { en: "position",            vi: "vị trí" }
-    ];
-
-    // ---------- Mission structure ----------
-    function buildMission(){
-      const set1 = {
-        type:"match",
-        title:"Set 1 — Vocabulary Match",
-        instruction:"Match the English word to its Vietnamese meaning. Click a word, then click its meaning. When finished, click Check.",
-        questions:[{
-          attempts:0, showHints:false, completed:false,
-          enList: shuffle(vocabPairs.map(p=>p.en)),
-          viList: shuffle(vocabPairs.map(p=>p.vi)),
-          correctMap: (() => {
-            const m = new Map();
-            vocabPairs.forEach(p => m.set(p.en, p.vi));
-            return m;
-          })(),
-          selection: { en:null },
-          assigned: new Map(),
-          wrongEn: new Set()
-        }]
-      };
-
-      const set2 = {
-        type:"drag",
-        title:"Set 2 — Number Tiles (1 question)",
-        instruction:"Drag (or click) the number tiles into the blanks. Then click Check.",
-        questions:[ makeSequenceQuestion() ]
-      };
-
-      const set3 = {
-        type:"fill",
-        title:"Set 3 — Fill in the Blanks",
-        instruction:"Fill in the blanks. Then click Check.",
-        questions:[ makeSequenceQuestion(), makeSequenceQuestion() ]
-      };
-
-      const set4 = {
-        type:"equation",
-        title:"Set 4 — Show Your Work",
-        instruction:"Fill in the first term and the gap. Then type an equation to show your work and type the answer number. Then click Check.",
-        questions:[ makeSequenceQuestion(), makeSequenceQuestion() ] // ONLY 2 questions now
-      };
-
-      return { sets:[set1,set2,set3,set4] };
-    }
-
-    // ---------- State ----------
-    let mission = buildMission();
-    let setIdx = 0;
-    let qIdx = 0;
-    let unlocked = [false,false,false,false];
-
-    // ---------- UI helpers ----------
-    function piecesCount(){
-      return unlocked.filter(Boolean).length;
-    }
-    function updatePuzzle(){
-      const count = piecesCount();
-      document.getElementById("pieceCountTop").textContent = count;
-      for (let i=0;i<4;i++){
-        const el = document.getElementById("piece"+i);
-        if (unlocked[i]) el.classList.add("unlocked");
-        else el.classList.remove("unlocked");
-      }
-    }
-
-    // ---------- Confetti (canvas) ----------
-    let confettiRAF = null;
-    let confettiParticles = [];
-    function startConfetti(){
-      const canvas = document.getElementById("confettiCanvas");
-      const ctx = canvas.getContext("2d");
-      function resize(){
-        canvas.width = window.innerWidth * devicePixelRatio;
-        canvas.height = window.innerHeight * devicePixelRatio;
-      }
-      resize();
-      window.addEventListener("resize", resize, { passive:true });
-
-      canvas.classList.add("show");
-
-      confettiParticles = [];
-      const colors = ["#2bb3d6","#7cda7a","#ffd56a","#ff7aa2","#8fe8ff","#b7f5a4"];
-      const count = 220;
-
-      for (let i=0;i<count;i++){
-        confettiParticles.push({
-          x: Math.random() * canvas.width,
-          y: -Math.random() * canvas.height,
-          r: (6 + Math.random()*10) * devicePixelRatio,
-          c: colors[i % colors.length],
-          vx: (-2 + Math.random()*4) * devicePixelRatio,
-          vy: (3 + Math.random()*7) * devicePixelRatio,
-          rot: Math.random() * Math.PI,
-          vr: (-0.08 + Math.random()*0.16),
-          shape: Math.random() < 0.5 ? "rect" : "circle"
-        });
-      }
-
-      function tick(){
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        for (const p of confettiParticles){
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rot += p.vr;
-
-          if (p.y > canvas.height + 40*devicePixelRatio){
-            p.y = -40*devicePixelRatio;
-            p.x = Math.random() * canvas.width;
-          }
-          if (p.x < -40*devicePixelRatio) p.x = canvas.width + 40*devicePixelRatio;
-          if (p.x > canvas.width + 40*devicePixelRatio) p.x = -40*devicePixelRatio;
-
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.rot);
-          ctx.fillStyle = p.c;
-          if (p.shape === "rect"){
-            ctx.fillRect(-p.r/2, -p.r/3, p.r, p.r/1.5);
-          } else {
-            ctx.beginPath();
-            ctx.arc(0,0,p.r/3,0,Math.PI*2);
-            ctx.fill();
-          }
-          ctx.restore();
-        }
-        confettiRAF = requestAnimationFrame(tick);
-      }
-      tick();
-    }
-
-    function stopConfetti(){
-      const canvas = document.getElementById("confettiCanvas");
-      canvas.classList.remove("show");
-      if (confettiRAF) cancelAnimationFrame(confettiRAF);
-      confettiRAF = null;
-      confettiParticles = [];
-    }
-
-    function showDone(){
-      document.getElementById("overlay").classList.add("show");
-      startConfetti();
-    }
-    function closeDone(){
-      document.getElementById("overlay").classList.remove("show");
-      stopConfetti();
-    }
-
-    // ---------- Reset logic ----------
-    function resetEntireMissionKeepQuestions(){
-      setIdx = 0;
-      qIdx = 0;
-      unlocked = [false,false,false,false];
-
-      mission.sets.forEach(s=>{
-        s.questions.forEach(q=>{
-          q.completed = false;
-          q.attempts = 0;
-          q.showHints = false;
-          if (s.type === "match"){
-            q.selection = { en:null };
-            q.assigned = new Map();
-            q.wrongEn = new Set();
-          }
-          delete q.inputs;
-          delete q.mark;
-          delete q.eq;
-          delete q.tiles;
-          delete q.blanks;
-          delete q.selectedTileId;
-        });
-      });
-      updatePuzzle();
-      render();
-    }
-
-    function resetCurrentSetOnly(){
-      const set = mission.sets[setIdx];
-      set.questions.forEach(q=>{
-        q.completed = false;
-        q.attempts = 0;
-        q.showHints = false;
-        if (set.type === "match"){
-          q.selection = { en:null };
-          q.assigned = new Map();
-          q.wrongEn = new Set();
-        }
-        delete q.inputs;
-        delete q.mark;
-        delete q.eq;
-        delete q.tiles;
-        delete q.blanks;
-        delete q.selectedTileId;
-      });
-      qIdx = 0;
-      render();
-      setStatus("Oops! You used 2 tries. This set restarts from the beginning.", "bad");
-    }
-
-    function newMission(){
-      mission = buildMission();
-      setIdx = 0;
-      qIdx = 0;
-      unlocked = [false,false,false,false];
-      updatePuzzle();
-      render();
-    }
-
-    // ---------- status bar ----------
-    function setStatus(text, kind){
-      const el = document.getElementById("statusBar");
-      if (!el) return;
-      el.classList.remove("ok","bad");
-      if (kind === "ok") el.classList.add("ok");
-      if (kind === "bad") el.classList.add("bad");
-      el.innerHTML = '<div class="dot"></div><div>' + text + '</div>';
-    }
-
-    function triesLeftText(attempts){
-      const left = Math.max(0, 2 - attempts);
-      return "Tries left: " + left + " / 2";
-    }
-
-    // ---------- Render ----------
-    function render(){
-      const set = mission.sets[setIdx];
-      const q = set.questions[qIdx];
-
-      document.getElementById("setLabel").textContent = (setIdx + 1);
-      document.getElementById("qLabel").textContent = (qIdx + 1);
-      document.getElementById("qTotalLabel").textContent = set.questions.length;
-
-      updatePuzzle();
-
-      const area = document.getElementById("activityArea");
-      area.innerHTML = "";
-
-      const titleRow = document.createElement("div");
-      titleRow.className = "question";
-      titleRow.textContent = set.title;
-      area.appendChild(titleRow);
-
-      if (set.type !== "match"){
-        const seq = document.createElement("div");
-        seq.className = "sequence";
-        seq.textContent = [
-          formatNumber(q.t1),
-          formatNumber(q.t2),
-          formatNumber(q.t3),
-          formatNumber(q.t4),
-          "…",
-          formatNumber(q.x)
-        ].join(", ");
-        area.appendChild(seq);
-
-        const mainQ = document.createElement("div");
-        mainQ.className = "question";
-        mainQ.innerHTML = 'What is the position of number <span class="chip">'+ formatNumber(q.x) +'</span>?';
-        area.appendChild(mainQ);
-      }
-
-      const instr = document.createElement("div");
-      instr.className = "instruction";
-      instr.innerHTML = '<div>' + set.instruction + '</div>' +
-                        '<div class="tries" id="triesText">' + triesLeftText(q.attempts || 0) + '</div>';
-      area.appendChild(instr);
-
-      const status = document.createElement("div");
-      status.className = "status";
-      status.id = "statusBar";
-      status.innerHTML = '<div class="dot"></div><div>Ready. Click “Check” when you finish.</div>';
-      area.appendChild(status);
-
-      if (set.type === "match"){
-        renderMatch(area, set, q);
-      } else if (set.type === "drag"){
-        renderDrag(area, set, q);
-      } else if (set.type === "fill"){
-        renderFill(area, set, q);
-      } else if (set.type === "equation"){
-        renderEquation(area, set, q);
-      }
-
-      const actions = document.createElement("div");
-      actions.className = "actions";
-
-      const btnCheck = document.createElement("button");
-      btnCheck.className = "btn-primary";
-      btnCheck.textContent = "Check";
-      btnCheck.type = "button";
-      btnCheck.addEventListener("click", ()=>checkCurrent());
-      actions.appendChild(btnCheck);
-
-      const btnNext = document.createElement("button");
-      btnNext.className = "btn-next";
-      btnNext.textContent = (isLastQuestionOfLastSet() ? "Finish" : "Next");
-      btnNext.type = "button";
-      btnNext.disabled = !q.completed;
-      btnNext.id = "btnNext";
-      btnNext.addEventListener("click", ()=>goNext());
-      actions.appendChild(btnNext);
-
-      area.appendChild(actions);
-
-      const triesEl = document.getElementById("triesText");
-      if (triesEl) triesEl.textContent = triesLeftText(q.attempts || 0);
-
-      applyHintsVisibility(q);
-    }
-
-    function applyHintsVisibility(q){
-      const show = !!q.showHints;
-      document.querySelectorAll(".hint").forEach(h=>{
-        if (show) h.classList.add("show");
-        else h.classList.remove("show");
-      });
-    }
-
-    function isLastQuestionOfLastSet(){
-      return (setIdx === mission.sets.length - 1) && (qIdx === mission.sets[setIdx].questions.length - 1);
-    }
-
-    // ---------- Set 1: Matching ----------
-    function renderMatch(area, set, q){
-      const grid = document.createElement("div");
-      grid.className = "match-grid";
-
-      const colEn = document.createElement("div");
-      colEn.className = "match-col";
-      colEn.innerHTML = '<div class="match-head">English</div>';
-      const listEn = document.createElement("div");
-      listEn.className = "match-list";
-
-      q.enList.forEach(en=>{
-        const item = document.createElement("div");
-        item.className = "card-item";
-        item.dataset.kind = "en";
-        item.dataset.value = en;
-
-        const left = document.createElement("div");
-        left.textContent = en;
-
-        const right = document.createElement("div");
-        const assigned = q.assigned.get(en);
-        if (assigned){
-          right.innerHTML = '<span class="mini-chip assigned">' + assigned + ' (click to remove)</span>';
-        } else {
-          right.innerHTML = '<span class="mini-chip">Pick meaning</span>';
-        }
-
-        item.appendChild(left);
-        item.appendChild(right);
-
-        if (q.selection.en === en) item.classList.add("selected");
-        if (q.completed) item.classList.add("matched");
-        if (q.wrongEn && q.wrongEn.has(en)) item.classList.add("wrong");
-
-        item.addEventListener("click", ()=>{
-          if (q.completed) return;
-          if (q.assigned.has(en)){
-            q.assigned.delete(en);
-            q.wrongEn.delete(en);
-            q.selection.en = null;
-          } else {
-            q.selection.en = (q.selection.en === en) ? null : en;
-          }
-          render();
-        });
-
-        listEn.appendChild(item);
-      });
-      colEn.appendChild(listEn);
-
-      const colVi = document.createElement("div");
-      colVi.className = "match-col";
-      colVi.innerHTML = '<div class="match-head">Vietnamese meaning</div>';
-      const listVi = document.createElement("div");
-      listVi.className = "match-list";
-
-      const usedVi = new Set(Array.from(q.assigned.values()));
-      q.viList.forEach(vi=>{
-        const item = document.createElement("div");
-        item.className = "card-item small";
-        item.dataset.kind = "vi";
-        item.dataset.value = vi;
-        item.innerHTML = '<div>'+vi+'</div><div class="mini-chip">'+ (usedVi.has(vi) ? "Used" : "Click") +'</div>';
-        if (usedVi.has(vi)) item.classList.add("matched");
-
-        item.addEventListener("click", ()=>{
-          if (q.completed) return;
-          if (!q.selection.en) return;
-          if (usedVi.has(vi)) return;
-
-          q.assigned.set(q.selection.en, vi);
-          q.selection.en = null;
-          render();
-        });
-
-        listVi.appendChild(item);
-      });
-      colVi.appendChild(listVi);
-
-      grid.appendChild(colEn);
-      grid.appendChild(colVi);
-      area.appendChild(grid);
-    }
-
-    // ---------- Set 2: Drag numbers (answer tiles only, allow duplicates by id) ----------
-    function initDragIfNeeded(q){
-      if (q.tiles) return;
-      const values = [q.a1, q.d, q.diff, q.gaps, q.pos];
-      q.tiles = values.map((v, idx)=>({ id: "t" + idx + "_" + Math.random().toString(16).slice(2), value: v, used:false }));
-      q.blanks = { a1:null, d:null, diff:null, gaps:null, pos:null }; // tileId
-      q.selectedTileId = null;
-    }
-    function tileById(q, id){
-      return q.tiles.find(t => t.id === id) || null;
-    }
-    function placeTileId(q, blankKey, tileId){
-      const tile = tileById(q, tileId);
-      if (!tile || tile.used) return;
-
-      if (q.blanks[blankKey]){
-        const prev = tileById(q, q.blanks[blankKey]);
-        if (prev) prev.used = false;
-      }
-      q.blanks[blankKey] = tileId;
-      tile.used = true;
-    }
-    function clearBlank(q, blankKey){
-      const tileId = q.blanks[blankKey];
-      if (!tileId) return;
-      const t = tileById(q, tileId);
-      if (t) t.used = false;
-      q.blanks[blankKey] = null;
-    }
-
-    function renderDrag(area, set, q){
-      initDragIfNeeded(q);
-
-      const rows = document.createElement("div");
-      rows.className = "rows";
-
-      const rowData = [
-        { key:"a1",  label:"The first term =", hint:"Look at the first number in the sequence." },
-        { key:"d",   label:"The gap (difference between consecutive terms) =", hint:"Find the difference between two consecutive terms." },
-        { key:"diff",label:`The difference between the first term and ${formatNumber(q.x)} is`, hint:`Compute: ${formatNumber(q.x)} – first term` },
-        { key:"gaps",label:`There are ______ gap(s) between the first term and ${formatNumber(q.x)}.`, hint:`Compute: (${formatNumber(q.x)} – first term) : gap` },
-        { key:"pos", label:`The position of ${formatNumber(q.x)} is`, hint:"Compute: number of gaps + 1" }
-      ];
-
-      rowData.forEach(r=>{
-        const row = document.createElement("div");
-        row.className = "row";
-
-        const left = document.createElement("div");
-        const labelClass = (r.key === "d") ? "label small" : "label";
-        left.innerHTML = `<div class="${labelClass}">${r.label}</div><div class="hint">${r.hint}</div>`;
-
-        const blank = document.createElement("div");
-        const tileId = q.blanks[r.key];
-        const tile = tileId ? tileById(q, tileId) : null;
-
-        blank.className = "blank" + (tile ? " filled" : "");
-        blank.dataset.key = r.key;
-        blank.innerHTML = tile ? formatNumber(tile.value) : '<span class="ph">Drop / click a number</span>';
-
-        blank.addEventListener("dragover", (e)=>{ e.preventDefault(); });
-        blank.addEventListener("drop", (e)=>{
-          e.preventDefault();
-          const id = e.dataTransfer.getData("text/plain");
-          if (!id) return;
-          placeTileId(q, r.key, id);
-          q.selectedTileId = null;
-          render();
-        });
-
-        blank.addEventListener("click", ()=>{
-          if (q.completed) return;
-
-          if (q.selectedTileId){
-            placeTileId(q, r.key, q.selectedTileId);
-            q.selectedTileId = null;
-            render();
-            return;
-          }
-          if (q.blanks[r.key]){
-            clearBlank(q, r.key);
-            render();
-          }
-        });
-
-        row.appendChild(left);
-        row.appendChild(blank);
-        rows.appendChild(row);
-      });
-
-      area.appendChild(rows);
-
-      const tileArea = document.createElement("div");
-      tileArea.className = "tile-area";
-
-      const title = document.createElement("div");
-      title.className = "tile-title";
-      title.textContent = "Number tiles:";
-      tileArea.appendChild(title);
-
-      q.tiles.forEach(t=>{
-        const el = document.createElement("div");
-        el.className = "tile" + (t.used ? " used" : "") + (q.selectedTileId === t.id ? " selected" : "");
-        el.textContent = formatNumber(t.value);
-        el.draggable = !t.used;
-
-        el.addEventListener("dragstart", (e)=>{
-          if (t.used) { e.preventDefault(); return; }
-          e.dataTransfer.setData("text/plain", t.id);
-        });
-
-        el.addEventListener("click", ()=>{
-          if (q.completed) return;
-          if (t.used) return;
-          q.selectedTileId = (q.selectedTileId === t.id) ? null : t.id;
-          render();
-        });
-
-        tileArea.appendChild(el);
-      });
-
-      area.appendChild(tileArea);
-    }
-
-    // ---------- Set 3: Fill blanks ----------
-    function renderFill(area, set, q){
-      if (!q.inputs){
-        q.inputs = { a1:"", d:"", diff:"", gaps:"", pos:"" };
-        q.mark = { a1:null, d:null, diff:null, gaps:null, pos:null };
-      }
-
-      const rows = document.createElement("div");
-      rows.className = "rows";
-
-      const rowData = [
-        { key:"a1",  label:"The first term =", hint:"Look at the first number in the sequence." },
-        { key:"d",   label:"The gap (difference between consecutive terms) =", hint:"Find the difference between two consecutive terms." },
-        { key:"diff",label:`The difference between the first term and ${formatNumber(q.x)} is`, hint:`Compute: ${formatNumber(q.x)} – first term` },
-        { key:"gaps",label:`There are ______ gap(s) between the first term and ${formatNumber(q.x)}.`, hint:`Compute: (${formatNumber(q.x)} – first term) : gap` },
-        { key:"pos", label:`The position of ${formatNumber(q.x)} is`, hint:"Compute: number of gaps + 1" }
-      ];
-
-      rowData.forEach(r=>{
-        const row = document.createElement("div");
-        row.className = "row";
-
-        const left = document.createElement("div");
-        const labelClass = (r.key === "d") ? "label small" : "label";
-        left.innerHTML = `<div class="${labelClass}">${r.label}</div><div class="hint">${r.hint}</div>`;
-
-        const input = document.createElement("input");
-        input.className = "input";
-        input.inputMode = "numeric";
-        input.autocomplete = "off";
-        input.value = q.inputs[r.key];
-
-        if (q.mark[r.key] === true) input.classList.add("correct");
-        if (q.mark[r.key] === false) input.classList.add("wrong");
-
-        input.addEventListener("input", ()=>{
-          q.inputs[r.key] = input.value;
-          q.mark[r.key] = null;
-        });
-
-        row.appendChild(left);
-        row.appendChild(input);
-        rows.appendChild(row);
-      });
-
-      area.appendChild(rows);
-    }
-
-    // ---------- Set 4: first term + gap + equation + answer(number) ----------
-    function renderEquation(area, set, q){
-      if (!q.eq){
-        q.eq = { first:"", gap:"", work:"", ans:"" };
-        q.mark = { first:null, gap:null, work:null, ans:null };
-      }
-
-      const rows = document.createElement("div");
-      rows.className = "rows";
-
-      // 1) first term
-      const r1 = document.createElement("div");
-      r1.className = "row";
-      r1.innerHTML = `<div><div class="label">1. The first term is</div></div>`;
-      const inFirst = document.createElement("input");
-      inFirst.className = "input";
-      inFirst.inputMode = "numeric";
-      inFirst.placeholder = "";
-      inFirst.value = q.eq.first;
-      if (q.mark.first === true) inFirst.classList.add("correct");
-      if (q.mark.first === false) inFirst.classList.add("wrong");
-      inFirst.addEventListener("input", ()=>{
-        q.eq.first = inFirst.value;
-        q.mark.first = null;
-      });
-      r1.appendChild(inFirst);
-      rows.appendChild(r1);
-
-      // 2) gap
-      const r2 = document.createElement("div");
-      r2.className = "row";
-      r2.innerHTML = `<div><div class="label">2. The gap is</div></div>`;
-      const inGap = document.createElement("input");
-      inGap.className = "input";
-      inGap.inputMode = "numeric";
-      inGap.placeholder = "";
-      inGap.value = q.eq.gap;
-      if (q.mark.gap === true) inGap.classList.add("correct");
-      if (q.mark.gap === false) inGap.classList.add("wrong");
-      inGap.addEventListener("input", ()=>{
-        q.eq.gap = inGap.value;
-        q.mark.gap = null;
-      });
-      r2.appendChild(inGap);
-      rows.appendChild(r2);
-
-      // 3) equation (full width + small text)
-      const r3 = document.createElement("div");
-      r3.className = "row stack";
-      const r3label = document.createElement("div");
-      r3label.innerHTML =
-        `<div class="label">Write an equation to show your work</div>
-         <div class="helper">Example: (9-3):3+1=3</div>`;
-      const inWork = document.createElement("input");
-      inWork.className = "input smalltext";
-      inWork.placeholder = "(9-3):3+1=3";
-      inWork.value = q.eq.work;
-      if (q.mark.work === true) inWork.classList.add("correct");
-      if (q.mark.work === false) inWork.classList.add("wrong");
-      inWork.addEventListener("input", ()=>{
-        q.eq.work = inWork.value;
-        q.mark.work = null;
-      });
-      r3.appendChild(r3label);
-      r3.appendChild(inWork);
-      rows.appendChild(r3);
-
-      // 4) answer number only
-      const r4 = document.createElement("div");
-      r4.className = "row";
-      r4.innerHTML =
-        `<div>
-          <div class="label">Answer</div>
-          <div class="helper">Example: 3</div>
-        </div>`;
-      const inAns = document.createElement("input");
-      inAns.className = "input";
-      inAns.inputMode = "numeric";
-      inAns.placeholder = "3";
-      inAns.value = q.eq.ans;
-      if (q.mark.ans === true) inAns.classList.add("correct");
-      if (q.mark.ans === false) inAns.classList.add("wrong");
-      inAns.addEventListener("input", ()=>{
-        q.eq.ans = inAns.value;
-        q.mark.ans = null;
-      });
-      r4.appendChild(inAns);
-      rows.appendChild(r4);
-
-      area.appendChild(rows);
-    }
-
-    // ---------- Checking logic ----------
-    function expectedValues(q){
-      return { a1:q.a1, d:q.d, diff:q.diff, gaps:q.gaps, pos:q.pos };
-    }
-
-    function checkCurrent(){
-      const set = mission.sets[setIdx];
-      const q = set.questions[qIdx];
-
-      setStatus("Checking...", "");
-
-      let ok = false;
-
-      if (set.type === "match"){
-        ok = checkMatch(q);
-      } else if (set.type === "drag"){
-        ok = checkDrag(q);
-      } else if (set.type === "fill"){
-        ok = checkFill(q);
-      } else if (set.type === "equation"){
-        ok = checkEquation(q);
-      }
-
-      if (ok){
-        q.completed = true;
-        setStatus("Correct. Click “Next”.", "ok");
-        const btnNext = document.getElementById("btnNext");
-        if (btnNext) btnNext.disabled = false;
-      } else {
-        q.attempts = (q.attempts || 0) + 1;
-        q.showHints = true;
-        const triesLeft = 2 - q.attempts;
-
-        if (triesLeft <= 0){
-          resetCurrentSetOnly();
-          return;
-        } else {
-          setStatus("Not yet. Try again. " + triesLeftText(q.attempts), "bad");
-          const btnNext = document.getElementById("btnNext");
-          if (btnNext) btnNext.disabled = true;
-        }
-      }
-
-      const triesEl = document.getElementById("triesText");
-      if (triesEl) triesEl.textContent = triesLeftText(q.attempts || 0);
-
-      applyHintsVisibility(q);
-    }
-
-    function checkMatch(q){
-      q.wrongEn = new Set();
-      if (q.assigned.size !== q.enList.length){
-        q.enList.forEach(en=>{
-          if (!q.assigned.has(en)) q.wrongEn.add(en);
-        });
-        render();
-        return false;
-      }
-      let allOk = true;
-      q.enList.forEach(en=>{
-        const chosen = q.assigned.get(en);
-        const correct = q.correctMap.get(en);
-        if (chosen !== correct){
-          q.wrongEn.add(en);
-          allOk = false;
-        }
-      });
-      render();
-      return allOk;
-    }
-
-    function checkDrag(q){
-      const keys = ["a1","d","diff","gaps","pos"];
-      const allFilled = keys.every(k => q.blanks && q.blanks[k]);
-
-      document.querySelectorAll(".blank").forEach(b=>{
-        b.classList.remove("correct","wrong");
-      });
-
-      if (!allFilled){
-        render();
-        return false;
-      }
-
-      const exp = expectedValues(q);
-      let allOk = true;
-
-      keys.forEach(k=>{
-        const tileId = q.blanks[k];
-        const tile = tileId ? tileById(q, tileId) : null;
-        const ok = tile && (tile.value === exp[k]);
-        if (!ok) allOk = false;
-        const blankEl = document.querySelector('.blank[data-key="'+k+'"]');
-        if (blankEl){
-          blankEl.classList.add(ok ? "correct" : "wrong");
-        }
-      });
-
-      return allOk;
-    }
-
-    function checkFill(q){
-      const exp = expectedValues(q);
-
-      const a1 = parseIntSafe(q.inputs.a1);
-      const d  = parseIntSafe(q.inputs.d);
-      const diff = parseIntSafe(q.inputs.diff);
-      const gaps = parseIntSafe(q.inputs.gaps);
-      const pos  = parseIntSafe(q.inputs.pos);
-
-      const okA1 = (a1 === exp.a1);
-      const okD  = (d === exp.d);
-      const okDiff = (diff === exp.diff);
-      const okGaps = (gaps === exp.gaps);
-      const okPos  = (pos === exp.pos);
-
-      q.mark.a1 = okA1;
-      q.mark.d = okD;
-      q.mark.diff = okDiff;
-      q.mark.gaps = okGaps;
-      q.mark.pos = okPos;
-
-      render();
-      return (okA1 && okD && okDiff && okGaps && okPos);
-    }
-
-    function checkEquation(q){
-      const expectedPos = q.pos;
-
-      // first term + gap
-      const first = parseIntSafe(q.eq.first);
-      const gap = parseIntSafe(q.eq.gap);
-      const okFirst = (first === q.a1);
-      const okGap = (gap === q.d);
-
-      // equation must contain "=" and be true; one side equals expectedPos
-      const raw = String(q.eq.work || "");
-      const cleaned = raw.replace(/\s+/g,"");
-      let okWork = false;
-
-      if (cleaned.includes("=")){
-        const parts = cleaned.split("=");
-        if (parts.length === 2){
-          const left = evalExpression(parts[0]);
-          const right = evalExpression(parts[1]);
-          if (left.ok && right.ok){
-            const same = Math.abs(left.value - right.value) < 1e-9;
-            const equalsExpected =
-              Math.abs(right.value - expectedPos) < 1e-9 || Math.abs(left.value - expectedPos) < 1e-9;
-            okWork = same && equalsExpected;
-          }
-        }
-      }
-
-      // answer (number only)
-      const ans = parseIntSafe(q.eq.ans);
-      const okAns = (ans === expectedPos);
-
-      q.mark.first = okFirst;
-      q.mark.gap = okGap;
-      q.mark.work = okWork;
-      q.mark.ans = okAns;
-
-      render();
-      return okFirst && okGap && okWork && okAns;
-    }
-
-    // ---------- Progression ----------
-    function goNext(){
-      const set = mission.sets[setIdx];
-      const q = set.questions[qIdx];
-      if (!q.completed) return;
-
-      if (qIdx < set.questions.length - 1){
-        qIdx++;
-        render();
-        return;
-      }
-
-      const allDone = set.questions.every(qq => qq.completed);
-      if (allDone){
-        unlocked[setIdx] = true;
-        updatePuzzle();
-      }
-
-      if (setIdx < mission.sets.length - 1){
-        setIdx++;
-        qIdx = 0;
-        render();
-        return;
-      }
-
-      if (unlocked.every(Boolean)){
-        showDone();
-      } else {
-        showDone();
-      }
-    }
-
-    // ---------- Buttons ----------
-    document.getElementById("btnRestart").addEventListener("click", ()=>{
-      resetEntireMissionKeepQuestions();
-    });
-    document.getElementById("btnNewMission").addEventListener("click", ()=>{
-      newMission();
-    });
-    document.getElementById("btnClose").addEventListener("click", closeDone);
-    document.getElementById("btnPlayAgain").addEventListener("click", ()=>{
-      closeDone();
-      newMission();
-    });
-
-    // ---------- Init ----------
-    updatePuzzle();
-    render();
-  </script>
-</body>
-</html>
